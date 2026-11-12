@@ -1,0 +1,32 @@
+--- a/app/app.py
++++ b/app/app.py
+@@ -3,4 +3,5 @@
+ import os
+ import sqlite3
++import html
+ from flask import Flask, request, redirect, session
+ 
+@@ -125,13 +125,9 @@ def login():
+         password = request.form.get("password", "")
+ 
+-        query = (
+-            "SELECT * FROM users WHERE username = '%s' AND password = '%s'"
+-            % (username, password)
+-        )
++        query = "SELECT * FROM users WHERE username = ? AND password = ?"
+         try:
+-            row = get_db().execute(query).fetchone()
++            row = get_db().execute(query, (username, password)).fetchone()
+         except sqlite3.Error as exc:
+-            return PAGE.format(title="Ошибка SQL", body="<pre>%s</pre>"
+-                               "<p>Запрос: <code>%s</code></p>" % (exc, query))
++            return PAGE.format(title="Ошибка SQL", body="<pre>%s</pre>" % exc)
+ 
+         if row:
+@@ -182,4 +182,5 @@ def guestbook():
+     for r in rows:
+-        items += "<div class='msg'><b>%s</b>: %s</div>" % (r["author"], r["body"])
++        items += "<div class='msg'><b>%s</b>: %s</div>" % (
++            html.escape(r["author"]), html.escape(r["body"]))
+ 
+     form = (
